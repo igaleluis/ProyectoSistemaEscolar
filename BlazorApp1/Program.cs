@@ -1,5 +1,6 @@
 using BlazorApp1.Components;
 using BlazorApp1.Data;
+using BlazorApp1.Repositorio;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+//Inyectar Repositorios
+builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
+builder.Services.AddScoped<IEstudianteRepositorio, EstudianteRepositorio>();
+builder.Services.AddScoped<IMaestroRepositorio, MaestroRepositorio>();
+builder.Services.AddScoped<ICursoRepositorio, CursoRepositorio>();
+builder.Services.AddScoped<IGradoRepositorio, GradoRepositorio>();
+builder.Services.AddScoped<ICalificacionesRepositorio, CalificacionesRepositorio>();
+
 
 var app = builder.Build();
 
