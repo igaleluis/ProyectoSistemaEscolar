@@ -4,6 +4,7 @@ namespace BlazorApp1.Repositorio
 {
     public interface IUsuarioRepositorio
     {
+        public Usuario ObtenerPorCorreo(string email);
         Task<List<Usuario>> GetUsuarios();
         Task<Usuario> GetUsuarioId(int idUsuario);
         Task<Usuario> CrearUsuario(Usuario usuario);

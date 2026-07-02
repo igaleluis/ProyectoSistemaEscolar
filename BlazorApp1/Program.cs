@@ -1,6 +1,8 @@
 using BlazorApp1.Components;
+using BlazorApp1.Components.MiddleWare;
 using BlazorApp1.Data;
 using BlazorApp1.Repositorio;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +10,19 @@ var builder = WebApplication.CreateBuilder(args);
 //Configuración conexión a sql
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexionDB")));
+
+builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
+
+//Configuracion autenticacion con cookies
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/";
+        options.LogoutPath = "/Logout";
+        options.AccessDeniedPath = "/AccessDenied";
+    });
+builder.Services.AddAuthorization();
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -33,6 +48,10 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseMiddleware<AuthMiddleware>();
+
 
 app.UseAntiforgery();
 

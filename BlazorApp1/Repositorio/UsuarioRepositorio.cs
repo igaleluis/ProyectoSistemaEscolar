@@ -14,6 +14,12 @@ namespace BlazorApp1.Repositorio
             _contexto = contexto;
         }
 
+
+        //Metodo 
+        public Usuario ObtenerPorCorreo(string email)
+        {
+            return _contexto.Usuarios.FirstOrDefault(x => x.Correo == email);
+        }
         // Implementación del método ActualizarUsuario
         public async Task<Usuario> ActualizarUsuario(int idUsuario, Usuario usuario)
         {

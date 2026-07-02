@@ -12,6 +12,12 @@ public partial class ApplicationDbContext : DbContext
     {
     }
 
+    private static List<Usuario> usuarios = new List<Usuario>();
+
+    public static Usuario? Verify(string correo, string contraseña)
+    {
+        return usuarios.FirstOrDefault(u => u.Correo == correo && u.Contraseña == contraseña);
+    }
     public virtual DbSet<Calificaciones> Calificaciones { get; set; }
 
     public virtual DbSet<Curso> Cursos { get; set; }
@@ -23,6 +29,8 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<Maestro> Maestros { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
