@@ -39,6 +39,11 @@ namespace BlazorApp1.Components.MiddleWare
                 {
                     context.Response.Redirect("/Home");
                 }
+            }else if (context.Request.Path == "/logout")
+            {
+                await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                context.Response.Redirect("/");
+                return;
             }
             else
             {

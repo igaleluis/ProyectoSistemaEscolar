@@ -22,7 +22,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/AccessDenied";
     });
 builder.Services.AddAuthorization();
-
+builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

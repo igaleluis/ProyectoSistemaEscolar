@@ -129,6 +129,7 @@ namespace BlazorApp1.Repositorio
 
 
         // Implementación del método LoginUsuario
+
         public async Task<Usuario> LoginUsuario(string correo, string contraseña)
         {
             var usuario = await _contexto.Usuarios.FirstOrDefaultAsync(u => u.Correo == correo);
