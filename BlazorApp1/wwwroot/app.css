@@ -1,6 +1,12 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: linear-gradient( 180deg, #f8f9fa 0%, #e3f2fd 50%, #d6eaff 100% );
+    min-height: 100vh;
+
 }
+
+
+
 
 a, .btn-link {
     color: #006bb7;

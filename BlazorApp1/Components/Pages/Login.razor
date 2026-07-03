@@ -4,12 +4,13 @@
 @using BlazorApp1.Components.MiddleWare
 @using Microsoft.AspNetCore.Authentication.Cookies;
 @using BlazorApp1.Repositorio
+@inject DialogService dialogService
 @inject NavigationManager nav
 @inject ApplicationDbContext db
 @inject IUsuarioRepositorio repo
 @layout EmptyLayout
-<section class="h-100 gradient-form" style="background-color: #eee;">
-    <div class="container py-5 h-100">
+<section class="vh-100 overflow-auto" style="background-color:#f4f6f9;">
+    <div class="container  h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-xl-10">
                 <div class="card rounded-3 text-black">
@@ -50,7 +51,11 @@
                                                 @mensajeError
                                             </div>
                                         }
-                                        <a class="text-muted" href="#!">Olvido su Contraseña?</a>
+                                        <RadzenButton Text="¿Olvidó su contraseña?"
+                                                      Variant="Variant.Text"
+                                                      ButtonStyle="ButtonStyle.Secondary"
+                                                      Click="OlvideContrasena"
+                                                      Style="padding:0; min-width:0;" />
                                     </div>
                                    
 
@@ -124,4 +129,22 @@
         public string Password { get; set; } = "";
     }
 
+    async Task OlvideContrasena()
+    {
+        await dialogService.Alert(
+        @<div>
+            <p>
+                Por favor comuníquese con el administrador del sistema para restablecer su contraseña.
+            </p>
+
+            <p>
+                <strong>Correo:</strong> admin@gmail.com
+            </p>
+
+            <p>
+                O bien acuda a la administración del colegio.
+            </p>
+        </div>,
+        "Recuperación de contraseña");
+    }
 }

@@ -2,12 +2,14 @@
 @using BlazorApp1.Models
 @inject IEstudianteRepositorio repo
 @inject DialogService dialogService
-<h3 class="text-center text-bg-primary">Lista de Estudiantes</h3>
+<div class="titulo-admin">
+    Lista de Estudiantes
+</div>
 <p>
 
 </p>
 
-<RadzenButton Text="Crear Estudiantes"
+<RadzenButton Text="Crear Estudiante"
     Icon="add_circle"
     ButtonStyle="ButtonStyle.Success"
     Click="CrearEstudiante"
