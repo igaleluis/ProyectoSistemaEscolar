@@ -90,10 +90,13 @@
         <RadzenTextBox Name="PassWordInput"
                        @bind-Value="usuario.Contraseña"
                        Style="width:100%" />
-
-        <RadzenRequiredValidator Component="PassWordInput"
-                                 Text="Contraseña obligatoria"
-                                 Popup="true" />
+        @if (!esEdicion)
+        {
+            <RadzenRequiredValidator Component="PassWordInput"
+                                     Text="Contraseña obligatoria"
+                                     Popup="true" />
+        }
+        
     </RadzenStack>
     
 
@@ -114,9 +117,17 @@
     <!-- Estado -->
     <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
         <RadzenLabel Text="Estado" Component="Estado" />
-        <RadzenTextBox Value="Activo"
-                       Disabled="true"
-                       Style="width:100%" />
+        <RadzenDropDown @bind-Value="usuario.Estado"
+                        Data="@estados"
+                        Name="Estado"
+                        Style="width:100%"
+                        Disabled="@(!esEdicion)" />
+        @if (esEdicion)
+        {
+            <RadzenRequiredValidator Component="Estado"
+                                     Text="Seleccione un rol"
+                                     Popup="true" />
+        }
     </RadzenStack>
     
     <RadzenStack Orientation="Orientation.Vertical"
@@ -135,22 +146,31 @@
 @code {
     [Parameter] public Usuario usuario { get; set; } = new();
     private string? mensajeError;
-
+    private bool esEdicion => usuario.IdUsuario != 0;
     private List<string> roles = new()
     {
         "Admin",
         "Maestro",
         "Estudiante"
     };
-    private async Task Guardar()
+    private List<string> estados = new()
     {
-        if(await repo.ExisteCorreo(usuario.Correo))
+        "Activo",
+        "Inactivo"
+    };
+
+    async Task Guardar()
+    {
+        if (usuario.IdUsuario == 0)
         {
-            mensajeError = "Este correo ya está en uso";
-            return;
+            usuario.Estado = "Activo";
+            await repo.CrearUsuario(usuario);
         }
-        usuario.Estado = "Activo";
-        await repo.CrearUsuario(usuario);
+        else
+        {
+            await repo.ActualizarUsuario(usuario.IdUsuario, usuario);
+        }
+
         DialogService.Close(true);
     }
 }

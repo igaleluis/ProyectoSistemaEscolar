@@ -12,6 +12,7 @@
     Click="CrearUsuario"
     class="mb-3"
 />
+
 <RadzenDataGrid Data="@usuarios"
                 TItem="Usuario"
                 AllowPaging="true"
@@ -83,7 +84,7 @@
     {
         usuarios = await repo.GetUsuarios();
     }
-
+    //Método para llamar al formulario crear usuario
     async Task CrearUsuario()
     {
         var result = await DialogService.OpenAsync<CrearUsuarioForm>(
@@ -95,14 +96,48 @@
        );
         usuarios = await repo.GetUsuarios();
     }
-    void Editar(int id)
+
+    //Método para llamar al formulario editar usuario
+    async Task Editar(int id)
     {
-        
+        var usuarioDesdeDb = usuarios.FirstOrDefault(x => x.IdUsuario == id);
+
+        if (usuarioDesdeDb == null) return;
+
+        var copia = new Usuario
+        {
+            IdUsuario = usuarioDesdeDb.IdUsuario,
+            Nombre = usuarioDesdeDb.Nombre,
+            Apellido = usuarioDesdeDb.Apellido,
+            FechaNacimiento = usuarioDesdeDb.FechaNacimiento,
+            Telefono = usuarioDesdeDb.Telefono,
+            Correo = usuarioDesdeDb.Correo,
+            Contraseña = "",
+            Rol = usuarioDesdeDb.Rol,
+            Estado = usuarioDesdeDb.Estado
+        };
+
+        var result = await DialogService.OpenAsync<CrearUsuarioForm>(
+            "Editar Usuario",
+            new Dictionary<string, object>
+            {
+            { "usuario", copia }
+            }
+        );
+
+        if (result == true)
+        {
+            usuarios = await repo.GetUsuarios();
+        }
     }
 
+    //Método para eliminar
     async Task Eliminar(int id)
     {
-        await repo.EliminarUsuario(id);
+        if (await DialogService.Confirm("¿Desea eliminar este usuario?") == true)
+        {
+            await repo.EliminarUsuario(id);
+        }
         usuarios = await repo.GetUsuarios();
     }
 }
