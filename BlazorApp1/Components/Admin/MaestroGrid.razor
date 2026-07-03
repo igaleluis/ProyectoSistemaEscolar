@@ -100,8 +100,11 @@
 
     async Task Eliminar(int idMaesro)
     {
-        await repo.EliminarMaestro(idMaesro);
-
+        if (await DialogService.Confirm("¿Desea eliminar este maestro?") == true)
+        {
+            await repo.EliminarMaestro(idMaesro);
+        }
+       
         maestros = await repo.GetMaestros();
     }
 }

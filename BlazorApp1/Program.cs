@@ -13,7 +13,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexionDB")));
 
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
-
+builder.Services.AddScoped<IMaestroRepositorio, MaestroRepositorio>();
+builder.Services.AddScoped<IEstudianteRepositorio, EstudianteRepositorio>();
 
 //Agregar Radzen 
 builder.Services.AddRadzenComponents();

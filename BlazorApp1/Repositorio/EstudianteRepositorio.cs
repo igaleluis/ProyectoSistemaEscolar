@@ -67,5 +67,14 @@ namespace BlazorApp1.Repositorio
                 .Include(e => e.IdGradoNavigation)
                 .ToListAsync();
         }
+
+        //Implementacion metodo getusuarios segun estudiantes
+        public async Task<List<Usuario>> GetUsuarioDisponibleEstudiante()
+        {
+            return await _contexto.Usuarios
+                .Where(u => u.Rol == "Estudiante" &&
+                !_contexto.Estudiantes.Any(e => e.IdUsuario == u.IdUsuario)
+                ).ToListAsync();
+        }
     }
 }

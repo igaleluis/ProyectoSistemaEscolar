@@ -1,0 +1,120 @@
+﻿@using BlazorApp1.Repositorio
+@using BlazorApp1.Models
+@inject IEstudianteRepositorio repo
+@inject DialogService dialogService
+<h3 class="text-center text-bg-primary">Lista de Estudiantes</h3>
+<p>
+
+</p>
+
+<RadzenButton Text="Crear Estudiantes"
+    Icon="add_circle"
+    ButtonStyle="ButtonStyle.Success"
+    Click="CrearEstudiante"
+    class="mb-3" />
+
+<RadzenDataGrid Data="@estudiantes"
+                TItem="Estudiante"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                PageSize="10">
+
+    <Columns>
+        <RadzenDataGridColumn TItem="Estudiante"
+                              Property="IdEstudiante"
+                              Title="ID" />
+
+        <RadzenDataGridColumn TItem="Estudiante"
+                              Title="Nombres">
+            <Template Context="estudiante">
+                @estudiante.IdUsuarioNavigation?.Nombre
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Estudiante"
+                              Title="Apellidos">
+            <Template Context="estudiante">
+                @estudiante.IdUsuarioNavigation?.Apellido
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Estudiante"
+                              Title="Teléfono">
+            <Template Context="estudiante">
+                @estudiante.IdUsuarioNavigation?.Telefono
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Estudiante"
+                              Title="Correo">
+            <Template Context="estudiante">
+                @estudiante.IdUsuarioNavigation?.Correo
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Estudiante"
+                              Title="Grado">
+            <Template Context="estudiante">
+                @estudiante.IdGradoNavigation?.Nombre
+            </Template>
+        </RadzenDataGridColumn>
+
+
+        <RadzenDataGridColumn TItem="Estudiante"
+                              Title="Acciones"
+                              Sortable="false"
+                              Filterable="false">
+
+            <Template Context="estudiante">
+
+                <RadzenButton Icon="delete"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@(() => Eliminar(estudiante.IdEstudiante))"
+                              class="ms-2" />
+
+            </Template>
+
+        </RadzenDataGridColumn>
+
+    </Columns>
+
+
+
+
+</RadzenDataGrid>
+@code {
+
+    private List<Estudiante> estudiantes = new List<Estudiante>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        estudiantes = await repo.GetEstudiantes();
+
+       
+    }
+    async Task CrearEstudiante()
+    {
+        var result = await dialogService.OpenAsync<CrearEstudianteForm>(
+             "Crear Estudiante",
+             new Dictionary<string, object>
+                 {
+                   {"estudiante", new Estudiante()}
+                 }
+       );
+        estudiantes = await repo.GetEstudiantes();
+    }
+
+
+    async Task Eliminar(int idEstudiante)
+    {
+        if (await dialogService.Confirm("¿Desea eliminar este estudiante?") == true)
+        {
+            await repo.EliminarEstudiante(idEstudiante);
+
+        }
+       
+        estudiantes = await repo.GetEstudiantes();
+    }
+}

@@ -1,0 +1,117 @@
+﻿@using BlazorApp1.Models
+@using BlazorApp1.Repositorio
+@inject IGradoRepositorio repo
+@inject DialogService dialogService
+<h3 class="text-center text-bg-primary">Lista de Grados</h3>
+<RadzenButton Text="Crear Grado"
+              Icon="add_circle"
+              ButtonStyle="ButtonStyle.Success"
+              Click="CrearGrado"
+              class="mb-3" />
+
+
+<RadzenDataGrid Data="@grados"
+                TItem="Grado"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                PageSize="10">
+
+    <Columns>
+        <RadzenDataGridColumn TItem="Grado"
+                              Property="IdGrado"
+                              Title="ID" />
+
+        <RadzenDataGridColumn TItem="Grado"
+                              Property="Nombre"
+                              Title="Nombre" />
+
+        <RadzenDataGridColumn TItem="Grado"
+                              Property="Nivel"
+                              Title="Nivel" />
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Property="Rol"
+                              Title="Rol" />
+
+        <RadzenDataGridColumn TItem="Grado"
+                              Title="Acciones"
+                              Sortable="false"
+                              Filterable="false">
+
+            <Template Context="grados">
+
+                <RadzenButton Icon="edit"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Size="ButtonSize.Small"
+                              Click="@(() => Editar(grados.IdGrado))" />
+
+                <RadzenButton Icon="delete"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@(() => Eliminar(grados.IdGrado))"
+                              class="ms-2" />
+
+            </Template>
+
+        </RadzenDataGridColumn>
+    </Columns>
+            
+            
+            
+            
+</RadzenDataGrid>
+@code {
+    private List<Grado> grados = new List<Grado>();
+    protected override async Task OnInitializedAsync()
+    {
+        grados = await repo.GetGrados();
+    }
+    async Task CrearGrado()
+    {
+        var result = await dialogService.OpenAsync<CrearGradoForm>(
+             "Crear Grado",
+             new Dictionary<string, object>
+                 {
+                   {"grado", new Grado()}
+                 }
+       );
+        grados = await repo.GetGrados();
+    }
+    async Task Editar(int idGrado)
+    {
+        var gradoDesdeDb = grados.FirstOrDefault(x => x.IdGrado == idGrado);
+
+        if (gradoDesdeDb == null) return;
+
+        var copia = new Grado
+        {
+            IdGrado = gradoDesdeDb.IdGrado,
+            Nombre = gradoDesdeDb.Nombre,
+            Nivel = gradoDesdeDb.Nivel
+
+        };
+
+        var result = await dialogService.OpenAsync<CrearGradoForm>(
+            "Editar Grado",
+            new Dictionary<string, object>
+            {
+            { "grado", copia }
+            }
+        );
+
+        if (result == true)
+        {
+            grados = await repo.GetGrados();
+        }
+    }
+    async Task Eliminar(int idGrado)
+    {
+
+        if (await dialogService.Confirm("¿Desea eliminar este grado?") == true)
+        {
+            await repo.EliminarGrado(idGrado);
+        }
+        grados = await repo.GetGrados();
+    }
+}

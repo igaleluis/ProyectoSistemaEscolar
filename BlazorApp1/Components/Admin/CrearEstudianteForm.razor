@@ -1,19 +1,19 @@
 ﻿@using BlazorApp1.Models
 @using BlazorApp1.Repositorio
-@inject IMaestroRepositorio repo
+@inject IEstudianteRepositorio repo
 @inject DialogService dialogService
-
-<RadzenTemplateForm TItem="Maestro"
-    Data="@maestro"
+<RadzenTemplateForm TItem="Estudiante"
+    Data="@estudiante"
     Submit="@Guardar">
     <RadzenValidationSummary />
+
     <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
 
-        <RadzenLabel Text="Usuario Maestro" />
+        <RadzenLabel Text="Usuario Estudiante" />
 
-        <RadzenDropDown Name="IdUsuario"
+        <RadzenDropDown Name="IdEstudiante"
                         Data="@usuarios"
-                        @bind-Value="maestro.IdUsuario"
+                        @bind-Value="estudiante.IdUsuario"
                         TextProperty="Nombre"
                         ValueProperty="IdUsuario"
                         Style="width:100%" />
@@ -32,23 +32,21 @@
      
 
 </RadzenTemplateForm>
-
-
-
 @code {
-    [Parameter] public Maestro maestro { get; set; } = new();
+    [Parameter]
+    public Estudiante estudiante { get; set; } = new();
+
     private List<Usuario> usuarios = new();
 
     protected override async Task OnInitializedAsync()
     {
-        usuarios = await repo.GetUsuarioDisponibleMaestro();
+        usuarios = await repo.GetUsuarioDisponibleEstudiante();
     }
+
     async Task Guardar()
     {
+        await repo.CrearEstudiante(estudiante);
 
-            await repo.CrearMaestro(maestro);
-
-            dialogService.Close(true);
-        
+        dialogService.Close(true);
     }
 }

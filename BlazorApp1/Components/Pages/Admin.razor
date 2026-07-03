@@ -30,13 +30,16 @@
                        @onclick='() => vistaActual = "Maestros"'>Ver Maestros</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="">Ver Estudiantes</a>
+                    <a class="nav-link active" 
+                        @onclick='()=> vistaActual = "Estudiantes"'>Ver Estudiantes</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="">Ver Cursos</a>
+                    <a class="nav-link active" 
+                    @onclick='()=> vistaActual = "Cursos"'>Ver Cursos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="">Ver Grados</a>
+                    <a class="nav-link active" 
+                    @onclick='()=> vistaActual="Grados"'>Ver Grados</a>
                 </li>
 
             </ul>
@@ -62,7 +65,17 @@
 }else if (vistaActual == "Maestros")
 {
     <MaestroGrid />
+}else if (vistaActual == "Estudiantes")
+{
+    <EstudianteGrid/>
+}else if (vistaActual == "Cursos")
+{
+    <CursosGrid/>
+}else if (vistaActual == "Grados")
+{
+    <GradosGrid/>
 }
+
 @code {
     string vistaActual = "Usuarios";
 
