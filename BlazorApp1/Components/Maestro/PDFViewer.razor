@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Components
+@inject DialogService dialogService
+<div style="position:fixed; top:10px; right:10px; z-index:9999;">
+    <RadzenButton Icon="close"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Click="@Cerrar" />
+</div>
+
+<iframe src="@PdfSrc"
+        style="width:100vw;height:100vh;border:none;"></iframe>
+
+@code {
+    [Parameter] public string PdfBase64 { get; set; }
+
+    private string PdfSrc;
+
+    protected override void OnInitialized()
+    {
+        PdfSrc = $"data:application/pdf;base64,{PdfBase64}";
+    }
+    void Cerrar()
+    {
+        dialogService.Close();
+    }
+}

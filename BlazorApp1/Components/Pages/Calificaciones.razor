@@ -4,7 +4,10 @@
 @using BlazorApp1.Repositorio
 @using Microsoft.AspNetCore.Authorization
 @using BlazorApp1.Components.Maestro
+@using BlazorApp1.Reportes
+@using QuestPDF.Fluent;
 @inject ICalificacionesRepositorio repoCalificaciones
+@inject ICursoRepositorio repoCurso
 @inject DialogService dialogService
 @attribute [Authorize(Roles = "Maestro")]
 
@@ -93,6 +96,13 @@
 
     </Columns>
 </RadzenDataGrid>
+<div class="container d-flex justify-content-end px-1 py-3">
+    <RadzenButton Text="Generar Cuadro de Notas"
+                  Icon="picture_as_pdf"
+                  ButtonStyle="ButtonStyle.Primary"
+                  Click="GenerarPDF" />
+</div>
+
 @code {
     [Parameter]
     public int IdCurso { get; set; }
@@ -135,5 +145,36 @@
         );
 
         calificaciones = await repoCalificaciones.GetCalificacionesCurso(IdCurso);
+    }
+
+    async Task GenerarPDF()
+    {
+        var curso = await repoCurso.ObtenerCursoId(IdCurso);
+
+        var pdf = new CuadroDeNotasMaestro(
+            curso.Nombre,
+            curso.IdGradoNavigation.Nombre,
+            calificaciones
+        );
+
+        var bytes = pdf.GeneratePdf();
+
+        var base64 = Convert.ToBase64String(bytes);
+
+        await dialogService.OpenAsync<PDFViewer>(
+            "Reporte de Notas",
+            new Dictionary<string, object>
+            {
+            { "PdfBase64", base64 }
+            },
+             new DialogOptions
+             {
+                 Width = "100vw",
+                 Height = "100vh",
+                 ShowTitle = false,
+                 ShowClose = true
+             }
+
+        );
     }
 }
