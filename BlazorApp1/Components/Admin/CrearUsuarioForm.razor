@@ -1,0 +1,156 @@
+﻿@using BlazorApp1.Models
+@using BlazorApp1.Repositorio
+@inject IUsuarioRepositorio repo
+@inject DialogService DialogService
+
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <RadzenAlert Severity="AlertSeverity.Error" Text="@mensajeError" />
+}
+<RadzenTemplateForm TItem="Usuario" Data="@usuario" Submit="@Guardar">
+
+    <RadzenValidationSummary />
+
+    <!-- Nombres -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Nombres" Component="UsernameInput" />
+        <RadzenTextBox Name="UsernameInput"
+                       @bind-Value="usuario.Nombre"
+                       Style="width:100%" />
+
+        <RadzenRequiredValidator Component="UsernameInput"
+                                 Text="Los nombres son obligatorios"
+                                 Popup="true" />
+    </RadzenStack>
+    
+
+    <!-- Apellidos -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Apellidos" Component="LastnameInput" />
+
+        <RadzenTextBox Name="LastnameInput"
+                       @bind-Value="usuario.Apellido"
+                       Style="width:100%" />
+
+        <RadzenRequiredValidator Component="LastnameInput"
+                                 Text="Apellidos obligatorios"
+                                 Popup="true" />
+    </RadzenStack>
+
+
+    <!-- Fecha -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Fecha de Nacimiento" Component="DateInput" />
+
+        <RadzenDatePicker Name="DateInput"
+                          @bind-Value="usuario.FechaNacimiento"
+                          Style="width:100%" />
+
+        <RadzenRequiredValidator Component="DateInput"
+                                 Text="Fecha obligatoria"
+                                 Popup="true" />
+    </RadzenStack>
+
+
+    <!-- Teléfono -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Teléfono" Component="PhoneInput" />
+
+        <RadzenTextBox Name="PhoneInput"
+                       @bind-Value="usuario.Telefono"
+                       Style="width:100%" />
+
+        <RadzenRequiredValidator Component="PhoneInput"
+                                 Text="Teléfono obligatorio"
+                                 Popup="true" />
+    </RadzenStack>
+
+
+    <!-- Correo -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Correo" Component="EmailInput" />
+
+        <RadzenTextBox Name="EmailInput"
+                       @bind-Value="usuario.Correo"
+                       Style="width:100%" />
+
+        <RadzenRequiredValidator Component="EmailInput"
+                                 Text="Correo obligatorio"
+                                 Popup="true" />
+
+        <RadzenEmailValidator Component="EmailInput"
+                              Text="Correo inválido"
+                              Popup="true" />
+    </RadzenStack>
+    
+
+    <!-- Password -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Contraseña" Component="PassWordInput" />
+        <RadzenTextBox Name="PassWordInput"
+                       @bind-Value="usuario.Contraseña"
+                       Style="width:100%" />
+
+        <RadzenRequiredValidator Component="PassWordInput"
+                                 Text="Contraseña obligatoria"
+                                 Popup="true" />
+    </RadzenStack>
+    
+
+    <!-- Rol -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Rol" Component="Rol" />
+        <RadzenDropDown Name="Rol"
+                        @bind-Value="usuario.Rol"
+                        Data="@roles"
+                        Style="width:100%" />
+
+        <RadzenRequiredValidator Component="Rol"
+                                 Text="Seleccione un rol"
+                                 Popup="true" />
+    </RadzenStack>
+    
+
+    <!-- Estado -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Estado" Component="Estado" />
+        <RadzenTextBox Value="Activo"
+                       Disabled="true"
+                       Style="width:100%" />
+    </RadzenStack>
+    
+    <RadzenStack Orientation="Orientation.Vertical"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        <RadzenLabel Text="" Component="espacio" />
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Guardar"
+                      Icon="save"
+                      ButtonStyle="ButtonStyle.Success" />
+
+    </RadzenStack>
+
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public Usuario usuario { get; set; } = new();
+    private string? mensajeError;
+
+    private List<string> roles = new()
+    {
+        "Admin",
+        "Maestro",
+        "Estudiante"
+    };
+    private async Task Guardar()
+    {
+        if(await repo.ExisteCorreo(usuario.Correo))
+        {
+            mensajeError = "Este correo ya está en uso";
+            return;
+        }
+        usuario.Estado = "Activo";
+        await repo.CrearUsuario(usuario);
+        DialogService.Close(true);
+    }
+}

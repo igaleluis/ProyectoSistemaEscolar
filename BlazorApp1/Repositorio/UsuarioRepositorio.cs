@@ -63,23 +63,23 @@ namespace BlazorApp1.Repositorio
 
 
         // Implementación del método CrearUsuario
+        public async Task<bool> ExisteCorreo(string correo)
+        {
+            return await _contexto.Usuarios
+                .AnyAsync(x => x.Correo == correo);
+        }
+
         public async Task<Usuario> CrearUsuario(Usuario usuario)
         {
             if (usuario != null)
             {
-                bool existeCorreo = await _contexto.Usuarios
-                   .AnyAsync(u => u.Correo == usuario.Correo);
-                if (existeCorreo)
-                {
-                    throw new Exception("El correo ya está registrado.");
-                }
-                else
-                {
+                
+               
                     usuario.Contraseña = BCrypt.Net.BCrypt.HashPassword(usuario.Contraseña);
                     await _contexto.Usuarios.AddAsync(usuario);
                     await _contexto.SaveChangesAsync();
                     return usuario;
-                }
+                
                     
 
             }

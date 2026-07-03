@@ -1,0 +1,108 @@
+﻿@using BlazorApp1.Models
+@using BlazorApp1.Repositorio
+@inject IUsuarioRepositorio repo
+@inject DialogService DialogService
+<h3 class="text-center text-bg-primary">Lista de Usuarios</h3>
+<p>
+
+</p>
+<RadzenButton Text="Crear Usuario"
+    Icon ="add_circle"
+    ButtonStyle="ButtonStyle.Success"
+    Click="CrearUsuario"
+    class="mb-3"
+/>
+<RadzenDataGrid Data="@usuarios"
+                TItem="Usuario"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                PageSize="10">
+
+    <Columns>
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Property="IdUsuario"
+                              Title="ID" />
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Property="Nombre"
+                              Title="Nombre" />
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Property="Apellido"
+                              Title="Apellido" />   
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Property ="FechaNacimiento"
+                              Title="Fecha de Nacimiento" />
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Property ="Telefono"
+                              Title ="Teléfono" />
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Property="Correo"
+                              Title="Correo" />
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Property="Rol"
+                              Title="Rol" />
+
+        <RadzenDataGridColumn TItem="Usuario"
+                              Title="Acciones"
+                              Sortable="false"
+                              Filterable="false">
+
+            <Template Context="usuario">
+
+                <RadzenButton Icon="edit"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Size="ButtonSize.Small"
+                              Click="@(() => Editar(usuario.IdUsuario))" />
+
+                <RadzenButton Icon="delete"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@(() => Eliminar(usuario.IdUsuario))"
+                              class="ms-2" />
+
+            </Template>
+
+        </RadzenDataGridColumn>
+
+    </Columns>
+
+</RadzenDataGrid>
+
+
+
+@code {
+    private List<Usuario> usuarios = new List<Usuario>();
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await repo.GetUsuarios();
+    }
+
+    async Task CrearUsuario()
+    {
+        var result = await DialogService.OpenAsync<CrearUsuarioForm>(
+             "Crear Usuario",
+             new Dictionary<string, object>
+                 {
+                   {"usuario", new Usuario()}
+                 }
+       );
+        usuarios = await repo.GetUsuarios();
+    }
+    void Editar(int id)
+    {
+        
+    }
+
+    async Task Eliminar(int id)
+    {
+        await repo.EliminarUsuario(id);
+        usuarios = await repo.GetUsuarios();
+    }
+}
