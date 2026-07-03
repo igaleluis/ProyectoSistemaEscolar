@@ -1,0 +1,100 @@
+﻿@using BlazorApp1.Models
+@using BlazorApp1.Repositorio
+@inject ICursoRepositorio repo
+@inject IMaestroRepositorio repoMaestro
+@inject IGradoRepositorio repoGrado
+@inject DialogService dialogService
+
+<RadzenTemplateForm TItem="Curso" Data="@curso" Submit="@Guardar">
+
+    <RadzenValidationSummary />
+
+    <!-- Nombre -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Nombre" Component="CursoInput" />
+        <RadzenTextBox Name="CursoInput"
+                       @bind-Value="curso.Nombre"
+                       Style="width:100%" />
+
+        <RadzenRequiredValidator Component="CursoInput"
+                                 Text="Los nombres son obligatorios"
+                                 Popup="true" />
+    </RadzenStack>
+    
+
+    <!--Maestro-->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Maestro" Component="Maestro" />
+        <RadzenDropDown Name="Maestro"
+                        Data="@maestros"
+                        @bind-Value="curso.IdMaestro"
+                        TextProperty="IdUsuarioNavigation.Nombre"
+                        ValueProperty="IdMaestro"
+                        Style="width:100%" />
+
+        <RadzenRequiredValidator Component="Maestro"
+                                 Text="Seleccione un Maestro"
+                                 Popup="true" />
+    </RadzenStack>
+
+    <!-- Grado -->
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Grado" Component="Grado" />
+        <RadzenDropDown Name="Grado"
+                        Data="@grados"
+                        @bind-Value="curso.IdGrado"
+                        TextProperty="Nombre"
+                        ValueProperty="IdGrado"
+                        Style="width:100%"
+                        Disabled="@esEdicion" />
+        @if (!esEdicion)
+        {
+            <RadzenRequiredValidator Component="Grado"
+                                     Text="Seleccione un Grado"
+                                     Popup="true" />
+        }
+    </RadzenStack>
+    
+    <RadzenStack Orientation="Orientation.Vertical"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        <RadzenLabel Text="" Component="espacio" />
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Guardar"
+                      Icon="save"
+                      ButtonStyle="ButtonStyle.Success" />
+
+    </RadzenStack>
+
+</RadzenTemplateForm>
+@code {
+
+    private bool esEdicion => curso.IdCurso != 0;
+    [Parameter]
+    public Curso curso { get; set; } = new();
+
+    private List<Maestro> maestros = new();
+    private List<Grado> grados = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        maestros = await repoMaestro.GetMaestros();
+        grados = await repoGrado.GetGrados();
+    }
+
+    async Task Guardar()
+    {
+        if (curso.IdCurso == 0)
+        {
+            
+            await repo.CrearCurso(curso);
+        }
+        else
+        {
+            await repo.ActualizarCurso(curso.IdCurso, curso);
+        }
+
+        dialogService.Close(true);
+    }
+
+}

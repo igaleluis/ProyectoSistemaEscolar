@@ -20,7 +20,6 @@ namespace BlazorApp1.Repositorio
             {
                 cursoDesdeDb.Nombre = curso.Nombre;
                 cursoDesdeDb.IdMaestro = curso.IdMaestro;
-                cursoDesdeDb.IdGrado = curso.IdGrado;
                 await _contexto.SaveChangesAsync();
                 return cursoDesdeDb;
             }
@@ -34,17 +33,19 @@ namespace BlazorApp1.Repositorio
         // Implementación del método CrearCurso
         public async Task<Curso> CrearCurso(Curso curso)
         {
-            
-            if(curso != null)
+            bool existe = await _contexto.Cursos
+            .AnyAsync(c => c.Nombre == curso.Nombre
+                    && c.IdGrado == curso.IdGrado);
+
+            if (existe)
             {
-                await _contexto.Cursos.AddAsync(curso);
-                await _contexto.SaveChangesAsync();
-                return curso;
+                throw new Exception("Ya existe un curso con ese nombre en este grado.");
             }
-            else
-            {
-                throw new Exception($"El curso no puede ser nulo");
-            }
+
+            await _contexto.Cursos.AddAsync(curso);
+            await _contexto.SaveChangesAsync();
+
+            return curso;
         }
 
 

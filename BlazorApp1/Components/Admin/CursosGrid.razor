@@ -1,5 +1,139 @@
-﻿
+﻿@using BlazorApp1.Models
+@using BlazorApp1.Repositorio
+@inject ICursoRepositorio repo
+@inject IGradoRepositorio repoGrado
+@inject IMaestroRepositorio repoMaestro
+@inject DialogService dialogService
+<h3 class="text-center text-bg-primary">Lista de Cursos</h3>
+<p>
 
+</p>
+
+<RadzenButton Text="Crear Cursos"
+              Icon="add_circle"
+              ButtonStyle="ButtonStyle.Success"
+              Click="CrearCurso"
+              class="mb-3" />
+
+<RadzenDataGrid Data="@cursos"
+                TItem="Curso"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                PageSize="10">
+
+    <Columns>
+        <RadzenDataGridColumn TItem="Curso"
+                              Property="IdCurso"
+                              Title="ID" />
+
+        <RadzenDataGridColumn TItem="Curso"
+                              Title="Nombre">
+            <Template Context="curso">
+                @curso.Nombre
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Curso"
+                              Title="Maestro">
+            <Template Context="curso">
+                @curso.IdMaestroNavigation?.IdUsuarioNavigation?.Nombre
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Curso"
+                              Title="Grado">
+            <Template Context="curso">
+                @curso.IdGradoNavigation?.Nombre
+            </Template>
+        </RadzenDataGridColumn>
+
+
+        <RadzenDataGridColumn TItem="Curso"
+                              Title="Acciones"
+                              Sortable="false"
+                              Filterable="false">
+
+            <Template Context="curso">
+                <RadzenButton Icon="edit"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Size="ButtonSize.Small"
+                              Click="@(() => Editar(curso.IdCurso))" />
+
+                <RadzenButton Icon="delete"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@(() => Eliminar(curso.IdCurso))"
+                              class="ms-2" />
+
+            </Template>
+
+        </RadzenDataGridColumn>
+
+    </Columns>
+
+
+
+
+</RadzenDataGrid>
 @code {
+    private List<Curso> cursos = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        cursos = await repo.GetCursos();
+
+    }
+
+    async Task CrearCurso()
+    {
+        var result = await dialogService.OpenAsync<CrearCursoForm>(
+             "Crear Curso",
+             new Dictionary<string, object>
+                 {
+                   {"curso", new Curso()}
+                 }
+       );
+        cursos = await repo.GetCursos();
+
+    }
+    async Task Editar(int idCurso)
+    {
+
+        var cursoDesdeDb = cursos.FirstOrDefault(c => c.IdCurso == idCurso);
+
+        if (cursoDesdeDb == null) return;
+
+        var copia = new Curso
+        {
+            IdCurso = cursoDesdeDb.IdCurso,
+            IdMaestro = cursoDesdeDb.IdMaestro,
+            IdGrado = cursoDesdeDb.IdGrado,
+            Nombre = cursoDesdeDb.Nombre
+        };
+
+        var result = await dialogService.OpenAsync<CrearCursoForm>(
+            "Editar Curso",
+            new Dictionary<string, object>
+            {
+            { "curso", copia }
+            }
+        );
+
+        if (result == true)
+        {
+            cursos = await repo.GetCursos();
+        }
+    }
+
+    async Task Eliminar(int idCurso)
+    {
+        if (await dialogService.Confirm("¿Desea eliminar este curso?") == true)
+        {
+            await repo.EliminarCurso(idCurso);
+        }
+        cursos = await repo.GetCursos();
+    }
 
 }

@@ -76,5 +76,7 @@ namespace BlazorApp1.Repositorio
                 !_contexto.Estudiantes.Any(e => e.IdUsuario == u.IdUsuario)
                 ).ToListAsync();
         }
+
+        
     }
 }

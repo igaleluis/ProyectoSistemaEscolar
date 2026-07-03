@@ -1,6 +1,7 @@
 ﻿@using BlazorApp1.Models
 @using BlazorApp1.Repositorio
 @inject IEstudianteRepositorio repo
+@inject IGradoRepositorio repoGrado
 @inject DialogService dialogService
 <RadzenTemplateForm TItem="Estudiante"
     Data="@estudiante"
@@ -18,6 +19,19 @@
                         ValueProperty="IdUsuario"
                         Style="width:100%" />
     </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+
+        <RadzenLabel Text="Grado" />
+
+        <RadzenDropDown Name="IdGrado"
+                        Data="@grados"
+                        @bind-Value="estudiante.IdGrado"
+                        TextProperty="Nombre"
+                        ValueProperty="IdGrado"
+                        Style="width:100%" />
+    </RadzenStack>
+
     <RadzenStack Orientation="Orientation.Vertical"
                  AlignItems="AlignItems.Center"
                  Gap="0.5rem">
@@ -38,9 +52,12 @@
 
     private List<Usuario> usuarios = new();
 
+    private List<Grado> grados = new();
+
     protected override async Task OnInitializedAsync()
     {
         usuarios = await repo.GetUsuarioDisponibleEstudiante();
+        grados = await repoGrado.GetGrados();
     }
 
     async Task Guardar()
