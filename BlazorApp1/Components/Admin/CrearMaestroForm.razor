@@ -1,0 +1,62 @@
+﻿@using BlazorApp1.Models
+@using BlazorApp1.Repositorio
+@inject IMaestroRepositorio repo
+@inject DialogService dialogService
+
+<RadzenTemplateForm TItem="Maestro"
+    Data="@maestro"
+    Submit="@Guardar">
+    <RadzenValidationSummary />
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+
+        <RadzenLabel Text="Usuario Maestro" />
+
+        <RadzenDropDown Name="IdUsuario"
+                        Data="@usuarios"
+                        @bind-Value="maestro.IdUsuario"
+                        TextProperty="Nombre"
+                        ValueProperty="IdUsuario"
+                        Style="width:100%" />
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Vertical"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        <RadzenLabel Text="" Component="espacio" />
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Guardar"
+                      Icon="save"
+                      ButtonStyle="ButtonStyle.Success" />
+
+    </RadzenStack>
+   
+     
+
+</RadzenTemplateForm>
+
+
+
+@code {
+    [Parameter] public Maestro maestro { get; set; } = new();
+    private List<Usuario> usuarios = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await repo.GetUsuarioDisponibleMaestro();
+    }
+    async Task Guardar()
+    {
+        try
+        {
+            Console.WriteLine($"IdUsuario: {maestro.IdUsuario}");
+
+            await repo.CrearMaestro(maestro);
+
+            dialogService.Close(true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.InnerException?.Message);
+        }
+    }
+}

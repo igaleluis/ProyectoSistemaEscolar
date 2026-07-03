@@ -63,5 +63,14 @@ namespace BlazorApp1.Repositorio
                 .Include(m => m.Cursos)
                 .ToListAsync();
         }
+
+        public async Task<List<Usuario>> GetUsuarioDisponibleMaestro()
+        {
+            return await _contexto.Usuarios
+                .Where(u => u.Rol == "Maestro" &&
+                            !_contexto.Maestros.Any(m => m.IdUsuario == u.IdUsuario))
+                .ToListAsync();
+        }
+
     }
 }

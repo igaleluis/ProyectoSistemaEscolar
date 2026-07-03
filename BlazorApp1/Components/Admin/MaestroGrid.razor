@@ -1,0 +1,107 @@
+﻿@using BlazorApp1.Models
+@using BlazorApp1.Repositorio
+@using Radzen.Blazor.Rendering
+@inject IMaestroRepositorio repo
+@inject DialogService DialogService
+<h3 class="text-center text-bg-primary">Lista de Maestros</h3>
+<p>
+
+</p>
+<RadzenButton Text="Crear Maestro"
+              Icon="add_circle"
+              ButtonStyle="ButtonStyle.Success"
+              Click="CrearMaestro"
+              class="mb-3" />
+
+<RadzenDataGrid Data ="@maestros"
+    TItem="Maestro"
+    AllowPaging="true"
+    AllowSorting="true"
+    AllowFiltering="true"
+    PageSize="10">
+
+    <Columns>
+        <RadzenDataGridColumn TItem="Maestro"
+                              Property="IdMaestro"
+                              Title="ID"
+                              />
+        
+        <RadzenDataGridColumn TItem="Maestro"
+            Title="Nombres">
+            <Template Context ="maestro">
+                @maestro.IdUsuarioNavigation?.Nombre
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Maestro"
+                              Title="Apellidos">
+            <Template Context="maestro">
+                @maestro.IdUsuarioNavigation?.Apellido
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Maestro"
+                              Title="Teléfono">
+            <Template Context="maestro">
+                @maestro.IdUsuarioNavigation?.Telefono
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Maestro"
+                              Title="Correo">
+            <Template Context="maestro">
+                @maestro.IdUsuarioNavigation?.Correo
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Maestro"
+                              Title="Acciones"
+                              Sortable="false"
+                              Filterable="false">
+
+            <Template Context="maestro">
+
+                <RadzenButton Icon="delete"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@(() => Eliminar(maestro.IdMaestro))"
+                              class="ms-2" />
+
+            </Template>
+
+        </RadzenDataGridColumn>
+              
+    </Columns>
+
+
+
+
+</RadzenDataGrid>
+
+@code {
+    private List<Maestro> maestros = new List<Maestro>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        maestros = await repo.GetMaestros();
+    }
+
+    async Task CrearMaestro()
+    {
+        var result = await DialogService.OpenAsync<CrearMaestroForm>(
+             "Crear Maestro",
+             new Dictionary<string, object>
+                 {
+                   {"maestro", new Maestro()}
+                 }
+       );
+        maestros = await repo.GetMaestros();
+    }
+
+    async Task Eliminar(int idMaesro)
+    {
+        await repo.EliminarMaestro(idMaesro);
+
+        maestros = await repo.GetMaestros();
+    }
+}
