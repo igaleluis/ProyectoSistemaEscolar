@@ -1,0 +1,81 @@
+﻿@using BlazorApp1.Repositorio
+@using BlazorApp1.Models
+@inject ICalificacionesRepositorio repoCalificaciones
+@inject DialogService dialogService
+<RadzenTemplateForm TItem="Calificaciones" Data="@calificacion" Submit="@Guardar">
+    <RadzenValidationSummary />
+    <!--Zona-->
+    <RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" Gap="0.5rem">
+        <RadzenLabel Text="Zona" Component="ZonaInput" />
+        <RadzenNumeric Name="ZonaInput" TValue="decimal?"
+                       @bind-Value="calificacion.Zona"
+                       Placeholder="Zona"
+                       Step="0.1"
+                       Min="0"
+                       Max="60"
+                       ShowUpDown="true"
+                       Style="width:100%"
+                       InputAttributes="@(new Dictionary<string, object>
+                                  {
+                                      { "aria-label", "Ingrese el valor de la zona máximo 60 mínimo 0" }
+                                  })" />
+        <RadzenRequiredValidator Component="ZonaInput"
+                                 Text="La zona es obligatoria"
+                                 Popup="true" />
+    </RadzenStack>
+    <!--Examen Final-->
+    <RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" Gap="0.5rem">
+        <RadzenLabel Text="Examen Final" Component="ExamenInput" />
+        <RadzenNumeric Name="ExamenInput" TValue="decimal?"
+                       @bind-Value="calificacion.ExamenFinal"
+                       Placeholder="Examen Final"
+                       Step="0.1"
+                       Min="0"
+                       Max="40"
+                       ShowUpDown="true"
+                       Style="width:100%"
+                       InputAttributes="@(new Dictionary<string, object>
+                                                 {
+                                                     { "aria-label", "Ingrese el valor del examen final máximo 40 mínimo 0" }
+                                                 })" />
+        <RadzenRequiredValidator Component="ExamenInput"
+                                 Text="El examen final es obligatorio"
+                                 Popup="true" />
+
+    </RadzenStack>
+    <!--Botón-->
+    <RadzenStack Orientation="Orientation.Vertical"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        <RadzenLabel Text="" Component="espacio" />
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Guardar"
+                      Icon="save"
+                      ButtonStyle="ButtonStyle.Success" />
+
+    </RadzenStack>
+
+
+</RadzenTemplateForm>
+@code {
+    [Parameter] public Calificaciones calificacion { get; set; } = new();
+
+    [Parameter] public int IdCurso { get; set; }
+    [Parameter] public int IdEstudiante { get; set; }
+
+    async Task Guardar()
+    {
+        if (calificacion.IdCalificacion == 0)
+        {
+            calificacion.IdCurso = IdCurso;
+            calificacion.IdEstudiante = IdEstudiante;
+            await repoCalificaciones.CrearCalificacion(calificacion);
+        }
+        else
+        {
+            await repoCalificaciones.EditarCalificacion(calificacion.IdCalificacion, calificacion);
+        }
+
+        dialogService.Close(true);
+    }
+}

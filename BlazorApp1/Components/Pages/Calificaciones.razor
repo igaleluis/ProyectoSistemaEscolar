@@ -1,0 +1,139 @@
+﻿@page "/Calificaciones/{IdCurso:int}"
+@layout EmptyLayout
+@using BlazorApp1.Models
+@using BlazorApp1.Repositorio
+@using Microsoft.AspNetCore.Authorization
+@using BlazorApp1.Components.Maestro
+@inject ICalificacionesRepositorio repoCalificaciones
+@inject DialogService dialogService
+@attribute [Authorize(Roles = "Maestro")]
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-colegio">
+    <div class="container-fluid">
+
+        <a class="navbar-brand d-flex align-items-center" href="/Maestro">
+            <img src="imagenes/logoColegio.png"
+                 style="height:40px; margin-right:10px;">
+            Colegio Nuevo Horizonte
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                        <i class="bi bi-box-arrow-in-right"></i> Cerrar Sesión
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+    </div>
+</nav>
+<RadzenDataGrid Data="@calificaciones"
+                TItem="CalificacionGridVM"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                PageSize="10">
+
+    <Columns>
+
+        <RadzenDataGridColumn TItem="CalificacionGridVM" Title="Estudiante">
+            <Template Context="estudiante">
+                @estudiante.Nombre @estudiante.Apellido
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CalificacionGridVM" Title="Zona">
+            <Template Context="zona">
+                @zona.Zona
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CalificacionGridVM" Title="Examen Final">
+            <Template Context="examenF">
+                @examenF.ExamenFinal
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CalificacionGridVM" Title="Total">
+            <Template Context="total">
+                <span class="@(total.Total >= 61 ? "text-success fw-bold" : "text-danger fw-bold")">
+                    @total.Total
+                </span>
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CalificacionGridVM" Title="Acciones">
+            <Template Context="acciones">
+
+                @if (acciones.TieneCalificacion)
+                {
+                    <RadzenButton Icon="edit"
+                                  Text="Editar"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Click="@(() => Editar(acciones.IdCalificacion!.Value))" />
+                }
+                else
+                {
+                    <RadzenButton Icon="add"
+                                  Text="Agregar"
+                                  ButtonStyle="ButtonStyle.Success"
+                                  Click="@(() => Crear(acciones.IdEstudiante))" />
+                }
+
+            </Template>
+        </RadzenDataGridColumn>
+
+    </Columns>
+</RadzenDataGrid>
+@code {
+    [Parameter]
+    public int IdCurso { get; set; }
+
+    private List<CalificacionGridVM> calificaciones = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        calificaciones = await repoCalificaciones.GetCalificacionesCurso(IdCurso);
+    }
+
+
+    async Task Editar(int idCalificacion)
+    {
+        var calificacion = await repoCalificaciones.ObtenerCalificacionesId(idCalificacion);
+
+        await dialogService.OpenAsync<CrearCalificacionForm>(
+            "Editar Calificación",
+            new Dictionary<string, object>
+            {
+            { "IdCurso", IdCurso },
+            { "IdEstudiante", calificacion.IdEstudiante },
+            { "calificacion", calificacion }
+            }
+        );
+
+        calificaciones = await repoCalificaciones.GetCalificacionesCurso(IdCurso);
+    }
+
+    async Task Crear(int idEstudiante)
+    {
+        await dialogService.OpenAsync<CrearCalificacionForm>(
+            "Agregar Calificación",
+            new Dictionary<string, object>
+            {
+                { "IdCurso", IdCurso },
+                { "IdEstudiante", idEstudiante },
+                { "calificacion", new BlazorApp1.Models.Calificaciones() }
+            }
+        );
+
+        calificaciones = await repoCalificaciones.GetCalificacionesCurso(IdCurso);
+    }
+}

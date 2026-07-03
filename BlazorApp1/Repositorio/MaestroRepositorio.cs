@@ -64,6 +64,13 @@ namespace BlazorApp1.Repositorio
                 .ToListAsync();
         }
 
+        public async Task<Maestro> GetMaestroPorIdUsuario(int idUsuario)
+        {
+            return await _contexto.Maestros
+                .FirstOrDefaultAsync(m => m.IdUsuario == idUsuario);
+        }
+
+
         public async Task<List<Usuario>> GetUsuarioDisponibleMaestro()
         {
             return await _contexto.Usuarios

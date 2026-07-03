@@ -1,0 +1,108 @@
+﻿@page "/Maestro"
+@layout EmptyLayout
+@using BlazorApp1.Components
+@using BlazorApp1.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorApp1.Repositorio
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject IMaestroRepositorio repoMaestro
+@inject ICursoRepositorio repoCurso
+@inject NavigationManager nav
+@attribute [Authorize(Roles = "Maestro")]
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-colegio">
+    <div class="container-fluid">
+
+        <a class="navbar-brand d-flex align-items-center">
+            <img src="imagenes/logoColegio.png"
+                 style="height:40px; margin-right:10px;">
+            Colegio Nuevo Horizonte
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+           
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                        <i class="bi bi-box-arrow-in-right"></i> Cerrar Sesión
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+    </div>
+</nav>
+
+<h3 class="text-center text-bg-primary">Mis Cursos</h3>
+<p>
+
+</p>
+<div class="container px-4 py-3">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+        @for (int i = 0; i < cursos.Count; i++)
+        {
+            var curso = cursos[i];
+
+            <div class="col-md-4 mb-3">
+
+                <div class="card text-white @colores[i % colores.Length] mb-3" style="max-width: 18rem;">
+
+                    <div class="card-header">
+                        @curso.Nombre
+                    </div>
+
+                    <div class="card-body">
+                        <h5>Grado: @curso.IdGradoNavigation?.Nombre</h5>
+                        <p>Nivel: @curso.IdGradoNavigation?.Nivel</p>
+                        <a @onclick='()=>VerCalificaciones(curso.IdCurso)' class="btn btn-primary">Ver Calificaciones</a>
+                    </div>
+
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+
+    private List<Curso> cursos = new();
+
+    Random random = new();
+
+    private readonly string[] colores =
+    {
+        "bg-primary",
+        "bg-success",
+        "bg-danger",
+        "bg-warning text-dark",
+        "bg-info text-dark",
+        "bg-secondary",
+        "bg-dark",
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        var idUsuario = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var maestro = await repoMaestro.GetMaestroPorIdUsuario(idUsuario);
+
+        cursos = await repoCurso.ObtenerCursosPorMaestro(maestro.IdMaestro);
+    }
+    void VerCalificaciones(int idCurso)
+    {
+        nav.NavigateTo($"/Calificaciones/{idCurso}");
+    }
+}

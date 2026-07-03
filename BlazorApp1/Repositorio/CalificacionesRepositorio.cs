@@ -104,5 +104,40 @@ namespace BlazorApp1.Repositorio
                 .Include(c => c.IdEstudianteNavigation)
                 .ToListAsync();
         }
+
+        //Implementacion del método con el virtual model
+        public async Task<List<CalificacionGridVM>> GetCalificacionesCurso(int idCurso)
+        {
+            var curso = await _contexto.Cursos
+                .FirstAsync(c => c.IdCurso == idCurso);
+
+            var estudiantes = await _contexto.Estudiantes
+                .Where(e => e.IdGrado == curso.IdGrado)
+                .Include(e => e.IdUsuarioNavigation)
+                .ToListAsync();
+
+            var calificaciones = await _contexto.Calificaciones
+                .Where(c => c.IdCurso == idCurso)
+                .ToListAsync();
+
+            var resultado = estudiantes.Select(e =>
+            {
+                var nota = calificaciones
+                    .FirstOrDefault(c => c.IdEstudiante == e.IdEstudiante);
+
+                return new CalificacionGridVM
+                {
+                    IdEstudiante = e.IdEstudiante,
+                    Nombre = e.IdUsuarioNavigation!.Nombre,
+                    Apellido = e.IdUsuarioNavigation.Apellido,
+
+                    IdCalificacion = nota?.IdCalificacion,
+                    Zona = nota?.Zona,
+                    ExamenFinal = nota?.ExamenFinal
+                };
+            }).ToList();
+
+            return resultado;
+        }
     }
 }

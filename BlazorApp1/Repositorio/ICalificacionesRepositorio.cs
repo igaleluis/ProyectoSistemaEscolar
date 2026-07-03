@@ -9,5 +9,6 @@ namespace BlazorApp1.Repositorio
         Task<Calificaciones> CrearCalificacion(Calificaciones calificacion);
         Task<Calificaciones> EditarCalificacion(int idCalificaciones, Calificaciones calificacion);
         Task EliminarCalificacion(int idCalificacion);
+        Task<List<CalificacionGridVM>> GetCalificacionesCurso(int idCurso);
     }
 }

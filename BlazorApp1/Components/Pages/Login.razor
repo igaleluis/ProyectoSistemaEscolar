@@ -99,6 +99,7 @@
         }
         var claims = new List<Claim>
         {
+            new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
             new Claim(ClaimTypes.Name, usuario.Correo),
             new Claim(ClaimTypes.Role, usuario.Rol),
         };

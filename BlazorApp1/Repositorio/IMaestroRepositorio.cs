@@ -8,6 +8,7 @@ namespace BlazorApp1.Repositorio
         
         Task<List<Usuario>> GetUsuarioDisponibleMaestro();
         Task<Maestro> GetMaestroId(int idMaestro);
+        Task<Maestro> GetMaestroPorIdUsuario(int idUsuario);
         Task<Maestro> CrearMaestro(Maestro maestro);
         Task EliminarMaestro(int idMaestro);
     }
