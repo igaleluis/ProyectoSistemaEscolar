@@ -77,6 +77,50 @@ namespace BlazorApp1.Repositorio
                 ).ToListAsync();
         }
 
-        
-    }
+
+        //Implementacion obtener estudiantes y mandarlos al modelo virtual
+        public async Task<List<CursoEstudianteVM>> GetCursosEstudiante(int idEstudiante)
+        {
+            var estudiante = await _contexto.Estudiantes
+        .Include(e => e.IdGradoNavigation)
+            .ThenInclude(g => g.Cursos)
+        .FirstOrDefaultAsync(e => e.IdEstudiante == idEstudiante);
+
+            if (estudiante == null)
+                return new List<CursoEstudianteVM>();
+
+            var cursos = estudiante.IdGradoNavigation.Cursos
+                .Select(curso => new CursoEstudianteVM
+                {
+                    IdCurso = curso.IdCurso,
+                    Nombre = curso.Nombre,
+                    Grado = estudiante.IdGradoNavigation.Nombre,
+                    Nivel = estudiante.IdGradoNavigation.Nivel,
+                    NotaFinal = _contexto.Calificaciones
+                        .Where(cal => cal.IdEstudiante == idEstudiante && cal.IdCurso == curso.IdCurso)
+                        .Select(cal => cal.NotaFinal)
+                        .FirstOrDefault()
+                })
+                .ToList();
+
+            return cursos;
+        }
+
+        //Implementacion obtener estudiante por id usuario
+        public async Task<Estudiante> GetEstudianteIdUsuario(int idUsuario)
+        {
+            var estudiante = await _contexto.Estudiantes
+               .Include(e => e.IdUsuarioNavigation)
+               .Include(e => e.IdGradoNavigation)
+                   .ThenInclude(g => g.Cursos)
+               .Include(e => e.Calificaciones)
+                   .ThenInclude(c => c.IdCursoNavigation)
+               .FirstOrDefaultAsync(e => e.IdUsuario == idUsuario);
+
+                    if (estudiante == null)
+                        throw new KeyNotFoundException("No se encontró el estudiante");
+
+            return estudiante;
+        }
+}
 }

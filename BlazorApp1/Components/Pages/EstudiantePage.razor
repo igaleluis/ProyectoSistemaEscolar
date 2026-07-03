@@ -1,0 +1,149 @@
+﻿@page "/Estudiante"
+@layout EmptyLayout
+@using BlazorApp1.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazorApp1.Repositorio
+@using System.Security.Claims
+@using BlazorApp1.Reportes
+@using BlazorApp1.Components.Estudiante
+@using QuestPDF.Fluent
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IEstudianteRepositorio repoEstudiante
+@inject DialogService dialogService
+@attribute [Authorize(Roles = "Estudiante")]
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-colegio">
+    <div class="container-fluid">
+
+        <a class="navbar-brand d-flex align-items-center">
+            <img src="imagenes/logoColegio.png"
+                 style="height:40px; margin-right:10px;">
+            Colegio Nuevo Horizonte
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nav">
+
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                        <i class="bi bi-box-arrow-in-right"></i> Cerrar Sesión
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+    </div>
+</nav>
+
+<h3 class="text-center text-bg-primary">Mis Cursos</h3>
+<p>
+
+</p>
+<div class="container px-4 py-3">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+        @for (int i = 0; i < cursos.Count; i++)
+        {
+            var curso = cursos[i];
+
+            <div class="col-md-4 mb-3">
+
+                <div class="card text-white @colores[i % colores.Length] mb-3" style="max-width: 18rem;">
+
+                    <div class="card-header">
+                        @curso.Nombre
+                    </div>
+
+                    <div class="card-body">
+                        <h5>Grado: @curso.Grado</h5>
+                        <p>Nivel: @curso.Nivel</p>
+                        <p>Nota: @(curso.NotaFinal.HasValue ? curso.NotaFinal.Value.ToString("0.##") : "Sin calificar")</p>
+                        </div>
+
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+<div class="container d-flex justify-content-end px-1 py-3">
+    <RadzenButton Text="Generar Boleta de Notas"
+                  Icon="picture_as_pdf"
+                  ButtonStyle="ButtonStyle.Primary"
+                  Click="GenerarPDF" />
+</div>
+
+@code {
+    private Estudiante estudiante = new();
+
+    private List<CursoEstudianteVM> cursos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = auth.User;
+
+        int idUsuario = int.Parse(
+            user.FindFirst(ClaimTypes.NameIdentifier)!.Value
+        );
+
+        estudiante = await repoEstudiante.GetEstudianteIdUsuario(idUsuario); 
+        int idEstudiante = estudiante.IdEstudiante;
+        cursos = await repoEstudiante.GetCursosEstudiante(estudiante.IdEstudiante);
+       
+    }
+
+    Random random = new();
+
+    private readonly string[] colores =
+    {
+        "bg-primary",
+        "bg-success",
+        "bg-danger",
+        "bg-warning text-dark",
+        "bg-info text-dark",
+        "bg-secondary",
+        "bg-dark",
+    };
+
+    async Task GenerarPDF()
+    {
+
+       
+
+        var pdf = new BoletaDeNotasAlumno(
+            $"{estudiante.IdUsuarioNavigation?.Nombre} {estudiante.IdUsuarioNavigation?.Apellido}",
+            estudiante.IdGradoNavigation?.Nombre ?? "",
+            cursos
+        );
+
+        var bytes = pdf.GeneratePdf();
+
+        var base64 = Convert.ToBase64String(bytes);
+
+        await dialogService.OpenAsync<PDFViewerEstudiante>(
+            "Boleta de Notas",
+            new Dictionary<string, object>
+            {
+            { "PdfBase64", base64 }
+            },
+             new DialogOptions
+             {
+                 Width = "100vw",
+                 Height = "100vh",
+                 ShowTitle = false,
+                 ShowClose = true
+             }
+
+        );
+    }
+    }
+
+   
+}
